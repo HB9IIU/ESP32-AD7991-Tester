@@ -1,64 +1,50 @@
 #include <Wire.h>
 #include <Arduino.h>
 
-#define AD7991_ADDR 0x29
-#define VREF_VOLTS  2.60f   // VIN3 external reference
+#define AD7991_ADDR 0x29   // AD7991-1, you already confirmed with scanner
+#define VREF_VOLTS  2.60f  // VIN3 = external 2.60 V reference
 
 void setup() {
   Serial.begin(115200);
   delay(200);
 
-  // Run slow first to be friendly with clock stretching
+  // SDA=21, SCL=22, 100 kHz safe speed
   Wire.begin(21, 22, 100000);
-  Serial.println("AD7991 loopback test: VIN0=2.60V, VIN1=GND, VIN3=2.60V ref");
+  Serial.println("AD7991 minimal test (VIN0+VIN1, VIN3=2.60V ref)");
 
-  // Quick address sanity
-  for (uint8_t a = 1; a < 127; a++) {
-    Wire.beginTransmission(a);
-    if (Wire.endTransmission() == 0) Serial.printf("I2C device: 0x%02X\n", a);
-  }
-}
-
-bool writeConfig(uint8_t cfg) {
+  // Configure once: VIN0+VIN1 sequence, REF_SEL=external
   Wire.beginTransmission(AD7991_ADDR);
-  Wire.write(cfg);
-  return Wire.endTransmission() == 0;
-}
-
-bool readSample(uint8_t &ch, uint16_t &raw, uint8_t &msb, uint8_t &lsb) {
-  int n = Wire.requestFrom(AD7991_ADDR, 2);
-  if (n != 2) return false;
-  msb = Wire.read();
-  lsb = Wire.read();
-  ch  = (msb >> 4) & 0x03;
-  raw = ((msb & 0x0F) << 8) | lsb;
-  return true;
+  Wire.write(0x38);   // D7..D4=0011, D3=1 (ext ref), rest=0
+  if (Wire.endTransmission() == 0) {
+    Serial.println("Config written OK");
+  } else {
+    Serial.println("Config write failed!");
+  }
 }
 
 void loop() {
-  // Config: VIN0 & VIN1 sequence, REF_SEL=1 (external on VIN3) => 0x38
-  if (!writeConfig(0x38)) {
-    Serial.println("Config write failed");
-    delay(1000);
-    return;
-  }
+  uint8_t buf[4];
+  int n = Wire.requestFrom(AD7991_ADDR, 4);  // get two results (VIN0 + VIN1)
+  if (n == 4) {
+    buf[0] = Wire.read();
+    buf[1] = Wire.read();
+    buf[2] = Wire.read();
+    buf[3] = Wire.read();
 
-  // Give the device a moment; then discard 2 warm-up reads
-  delayMicroseconds(10);
-  uint8_t ch, msb, lsb; uint16_t raw;
-  readSample(ch, raw, msb, lsb);
-  readSample(ch, raw, msb, lsb);
+    // Decode first sample
+    uint8_t ch0 = (buf[0] >> 4) & 0x03;
+    uint16_t raw0 = ((buf[0] & 0x0F) << 8) | buf[1];
+    float volts0 = raw0 * (VREF_VOLTS / 4095.0f);
 
-  // Now read two samples which should be CH0 then CH1
-  for (int i = 0; i < 2; i++) {
-    if (readSample(ch, raw, msb, lsb)) {
-      float volts = raw * (VREF_VOLTS / 4095.0f);
-      Serial.printf("SEQ %d  RAW: msb=0x%02X lsb=0x%02X  CH%d raw=%u  %.4f V\n",
-                    i, msb, lsb, ch, raw, volts);
-    } else {
-      Serial.println("No data");
-    }
-    delayMicroseconds(10);
+    // Decode second sample
+    uint8_t ch1 = (buf[2] >> 4) & 0x03;
+    uint16_t raw1 = ((buf[2] & 0x0F) << 8) | buf[3];
+    float volts1 = raw1 * (VREF_VOLTS / 4095.0f);
+
+    Serial.printf("CH%d raw=%u  %.4f V | CH%d raw=%u  %.4f V\n",
+                  ch0, raw0, volts0, ch1, raw1, volts1);
+  } else {
+    Serial.println("No data from AD7991");
   }
 
   delay(500);
