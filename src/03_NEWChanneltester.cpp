@@ -1,10 +1,10 @@
 #include <Wire.h>
 #include <Arduino.h>
 
-#define SDA_PIN 21   // ESP32 default
-#define SCL_PIN 22   // ESP32 default
+#define SDA_PIN 21
+#define SCL_PIN 22
 
-byte ad7991_addr = 0x00; // Will be detected by I2C scanner
+byte ad7991_addr = 0x00;
 
 void setup() {
   Serial.begin(115200);
@@ -28,29 +28,39 @@ void setup() {
     while (1);
   }
 
-  // --- Configure AD7991: enable CH0, CH1, CH2 only (VIN3 is VREF) ---
-  Wire.beginTransmission(ad7991_addr);
-  Wire.write(0xE0);  // 1110 xxxx -> enable CH0, CH1, CH2
-  Wire.endTransmission();
-  Serial.println("AD7991 configured: CH0–CH2 enabled, VDD reference = VIN3 = 3.3V");
+  Serial.println("AD7991 ready (CH0–CH2 enabled, VIN3 as VREF=3.3V).");
 }
 
 void loop() {
-  Wire.requestFrom(ad7991_addr, (uint8_t)2);
-  if (Wire.available() == 2) {
-    uint8_t msb = Wire.read();
-    uint8_t lsb = Wire.read();
+  int values[3] = {0, 0, 0};
 
-    int channel = (msb >> 4) & 0x03;   // channel ID (0–2)
-    int value   = ((msb & 0x0F) << 8) | lsb; // 12-bit ADC value (0–4095)
+  // Request conversions for CH0–CH2
+  for (int i = 0; i < 3; i++) {
+    byte mask = (1 << (7 - i));  // CH0=0x80, CH1=0x40, CH2=0x20
 
-    if (channel <= 2) {  // only print valid inputs
-      Serial.print("CH");
-      Serial.print(channel);
-      Serial.print(": ");
-      Serial.println(value);
+    Wire.beginTransmission(ad7991_addr);
+    Wire.write(mask);   // select channel
+    Wire.endTransmission();
+
+    delayMicroseconds(10); // wait for conversion (~1µs required)
+
+    Wire.requestFrom(ad7991_addr, (uint8_t)2);
+    if (Wire.available() == 2) {
+      uint8_t msb = Wire.read();
+      uint8_t lsb = Wire.read();
+      int channel = (msb >> 4) & 0x03;
+      int value   = ((msb & 0x0F) << 8) | lsb;
+      if (channel <= 2) values[channel] = value;
     }
   }
 
-  delay(100);
+  // Print all three values on one line
+  Serial.print("CH0=");
+  Serial.print(values[0]);
+  Serial.print("  CH1=");
+  Serial.print(values[1]);
+  Serial.print("  CH2=");
+  Serial.println(values[2]);
+
+  delay(200);
 }
