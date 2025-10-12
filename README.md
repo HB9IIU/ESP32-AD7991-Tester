@@ -16,3 +16,8 @@ It is not a complete project, and there is **no detailed description or document
 
 ⚠️ **Disclaimer**  
 This repository is not meant to be polished or published. It is purely experimental.
+
+
+
+curl -fsSLo ~/hb9iiuADSBinstaller.sh https://raw.githubusercontent.com/HB9IIU/ESP32-AD7991-Tester/main/ADSBinstallerTotest/hb9iiuADSBinstaller.sh && chmod +x ~/hb9iiuADSBinstaller.sh && sudo ~/hb9iiuADSBinstaller.sh
+
