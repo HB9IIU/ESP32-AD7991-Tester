@@ -28,21 +28,21 @@ void setup() {
     while (1);
   }
 
-  Serial.println("AD7991 ready (CH0–CH2 enabled, VIN3 as VREF=3.3V).");
+  Serial.println("AD7991 ready (CH0–CH2 only, VIN3 is VREF).");
 }
 
 void loop() {
   int values[3] = {0, 0, 0};
 
-  // Request conversions for CH0–CH2
+  // Read CH0–CH2 one by one
   for (int i = 0; i < 3; i++) {
     byte mask = (1 << (7 - i));  // CH0=0x80, CH1=0x40, CH2=0x20
 
     Wire.beginTransmission(ad7991_addr);
-    Wire.write(mask);   // select channel
+    Wire.write(mask);            // select channel
     Wire.endTransmission();
 
-    delayMicroseconds(10); // wait for conversion (~1µs required)
+    delayMicroseconds(10);       // wait for conversion (~1µs required)
 
     Wire.requestFrom(ad7991_addr, (uint8_t)2);
     if (Wire.available() == 2) {
@@ -54,7 +54,7 @@ void loop() {
     }
   }
 
-  // Print all three values on one line
+  // Print raw results
   Serial.print("CH0=");
   Serial.print(values[0]);
   Serial.print("  CH1=");
