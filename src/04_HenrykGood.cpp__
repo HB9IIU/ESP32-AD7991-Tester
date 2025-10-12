@@ -1,0 +1,32 @@
+#include <Wire.h>
+#include <Arduino.h>
+
+#define SDA_PIN 21
+#define SCL_PIN 22
+const uint8_t AD_ADDR = 0x29;  // your scanner showed 0x29
+
+void setup() {
+  Serial.begin(115200);
+  Wire.begin(SDA_PIN, SCL_PIN);
+  Wire.setClock(100000);
+
+  // CH1 only, REF_SEL=0 (VDD reference)
+  // D7..D4 = CH3 CH2 CH1 CH0 -> 0010 = 0x20
+  Wire.beginTransmission(AD_ADDR);
+  Wire.write(0x28);
+  Wire.endTransmission();
+
+  Serial.println("AD7991: CH1 enabled, VDD reference");
+}
+
+void loop() {
+  if (Wire.requestFrom(AD_ADDR, (uint8_t)2) == 2) {
+    uint8_t msb = Wire.read(), lsb = Wire.read();
+    uint16_t w   = ((uint16_t)msb << 8) | lsb;
+    uint8_t chid = (w & 0x3000) >> 12;   // expect 1
+    uint16_t val = (w & 0x0FFF);         // 12-bit raw
+    Serial.print("CH"); Serial.print(chid);
+    Serial.print(" VALUE="); Serial.println(val);
+  }
+  delay(300);
+}
