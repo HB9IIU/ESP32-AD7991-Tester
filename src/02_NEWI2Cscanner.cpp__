@@ -1,0 +1,38 @@
+#include <Wire.h>
+#include <Arduino.h>
+void setup() {
+  Serial.begin(115200);
+  Wire.begin();  // ESP32 defaults: SDA = 21, SCL = 22
+
+  Serial.println("Scanning I2C bus...");
+  
+  for (byte address = 1; address < 127; address++) {
+    Wire.beginTransmission(address);
+    if (Wire.endTransmission() == 0) {
+      Serial.print("Found I2C device at 0x");
+      Serial.println(address, HEX);
+
+      // Check if this is an AD7991
+      if (address >= 0x28 && address <= 0x2B) {
+        Serial.print("  -> Looks like AD7991 (ADDR = 0x");
+        Serial.print(address, HEX);
+        Serial.println(")");
+
+        // Decode A0/A1 pin state
+        int offset = address - 0x28;
+        bool A0 = offset & 0x01;
+        bool A1 = offset & 0x02;
+
+        Serial.print("     A1 = ");
+        Serial.print(A1 ? "HIGH (VDD)" : "LOW (GND)");
+        Serial.print(", A0 = ");
+        Serial.println(A0 ? "HIGH (VDD)" : "LOW (GND)");
+      }
+    }
+  }
+  Serial.println("Scan done.");
+}
+
+void loop() {
+  // Nothing here
+}
