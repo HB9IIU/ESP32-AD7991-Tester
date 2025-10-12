@@ -15,12 +15,9 @@ void setup() {
   for (byte address = 1; address < 127; address++) {
     Wire.beginTransmission(address);
     if (Wire.endTransmission() == 0) {
-      Serial.print("Found I2C device at 0x");
-      Serial.println(address, HEX);
-
       if (address >= 0x28 && address <= 0x2B) {
         ad7991_addr = address;
-        Serial.print(" -> AD7991 detected at 0x");
+        Serial.print("AD7991 found at 0x");
         Serial.println(ad7991_addr, HEX);
       }
     }
@@ -30,26 +27,30 @@ void setup() {
     Serial.println("No AD7991 found! Stopping.");
     while (1);
   }
+
+  // --- Configure AD7991: enable CH0, CH1, CH2 only (VIN3 is VREF) ---
+  Wire.beginTransmission(ad7991_addr);
+  Wire.write(0xE0);  // 1110 xxxx -> enable CH0, CH1, CH2
+  Wire.endTransmission();
+  Serial.println("AD7991 configured: CH0–CH2 enabled, VDD reference = VIN3 = 3.3V");
 }
 
 void loop() {
-  // The AD7991 cycles through enabled channels automatically.
-  // Default after power-up: all 4 channels active.
-  // Each read gives channel ID + 12-bit result.
-
   Wire.requestFrom(ad7991_addr, (uint8_t)2);
   if (Wire.available() == 2) {
     uint8_t msb = Wire.read();
     uint8_t lsb = Wire.read();
 
-    int channel = (msb >> 4) & 0x03;   // bits [5:4] = channel number
-    int value   = ((msb & 0x0F) << 8) | lsb; // 12-bit ADC value
+    int channel = (msb >> 4) & 0x03;   // channel ID (0–2)
+    int value   = ((msb & 0x0F) << 8) | lsb; // 12-bit ADC value (0–4095)
 
-    Serial.print("CH");
-    Serial.print(channel);
-    Serial.print(": ");
-    Serial.println(value);
+    if (channel <= 2) {  // only print valid inputs
+      Serial.print("CH");
+      Serial.print(channel);
+      Serial.print(": ");
+      Serial.println(value);
+    }
   }
 
-  delay(100); // adjust speed as needed
+  delay(100);
 }
