@@ -44,6 +44,54 @@ void setup()
   }
   Serial.println("AD7991: CH1+CH0, ext ref (2.6V).");
   delay(5);
+
+ // --- Backlight control sequence ---
+    pinMode(TFT_BLP, OUTPUT);
+    digitalWrite(TFT_BLP, HIGH); // Leave ON
+
+    // --- TFT setup ---
+    tft.init();
+    tft.setRotation(3);
+    tft.fillScreen(TFT_BLACK);
+
+    // --- Touch calibration (auto unless forced) ---
+    checkAndApplyTFTCalibrationData(false); // set to true to force recalibration
+
+    tft.setTextDatum(MC_DATUM);
+    tft.setTextSize(1);
+    tft.setTextColor(TFT_GREEN, TFT_BLACK);
+    tft.setTextSize(2);
+
+    // --- Status message below ---
+
+    tft.setTextDatum(BL_DATUM);
+tft.setTextColor(TFT_WHITE, TFT_DARKGREY);
+tft.drawCentreString("AD7991 Calibration Tool",160,0,2);
+
+
+    tft.drawString("Ch.", 20, yLine1 + 22, 1);
+    tft.setTextColor(TFT_WHITE, TFT_BLACK);
+    tft.drawString("Ch.", 20, yLine1 + 22, 1);
+    tft.drawString("00", 24, yLine1 + 48, 1);
+
+    tft.setTextColor(TFT_WHITE, TFT_BLACK);
+    tft.drawString("Ch.", 20, yLine2 + 22, 1);
+    tft.drawString("01", 24, yLine2 + 48, 1);
+
+    tft.setTextColor(TFT_GREEN, TFT_BLACK);
+    tft.setTextSize(1);
+    tft.drawRightString(String(8888), leftMargin, yLine1, 7); // right edge at x=300
+    tft.drawRightString(String(8888), leftMargin, yLine2, 7); // right edge at x=300
+    tft.setTextColor(TFT_WHITE, TFT_BLACK);
+    tft.setTextSize(2);
+    tft.drawRightString(String("8.88 V"), leftMargin2, yLine1 + 32, 1); // right edge at x=300
+    tft.drawRightString(String("8.88 V"), leftMargin2, yLine2 + 32, 1); // right edge at x=300
+    tft.setTextSize(1);
+
+    Serial.println("📟 TFT + Touch test ready");
+
+
+
 }
 
 void loop()
