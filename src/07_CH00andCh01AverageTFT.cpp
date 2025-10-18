@@ -31,6 +31,7 @@ bool readSample(uint8_t &chid, uint16_t &raw12);
 void setup()
 {
   Serial.begin(115200);
+  /*
   Wire.begin(SDA_PIN, SCL_PIN);
   Wire.setClock(100000);
 
@@ -44,7 +45,7 @@ void setup()
   }
   Serial.println("AD7991: CH1+CH0, ext ref (2.6V).");
   delay(5);
-
+*/
  // --- Backlight control sequence ---
     pinMode(TFT_BLP, OUTPUT);
     digitalWrite(TFT_BLP, HIGH); // Leave ON
