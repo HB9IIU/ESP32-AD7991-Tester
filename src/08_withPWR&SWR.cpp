@@ -135,9 +135,8 @@ void loop()
     tft.setTextColor(TFT_BLACK, TFT_BLACK);
     tft.drawRightString(String(-8888), leftMargin - 60, yLine3, 7);
     tft.setTextColor(TFT_YELLOW, TFT_BLACK);
-    float mW0 = 1.84f * (float)avg0 - 5634.6f; // RAW -> mW
-     tft.setTextColor(TFT_BLACK, TFT_BLACK);
-    mW0=0;
+    //y = 2.6693x - 8210.9
+    float mW0 = 2.6693f * (float)avg0 - 8210.9f; // RAW -> mW
     tft.drawRightString(String(mW0, 0), leftMargin - 60, yLine3, 7);
   }
   else
@@ -165,9 +164,8 @@ void loop()
     tft.setTextColor(TFT_BLACK, TFT_BLACK);
     tft.drawRightString(String(-8888), 320 - 10, yLine3, 7);
     tft.setTextColor(TFT_YELLOW, TFT_BLACK);
-    // float dBm0 = 0.0256f * (float)avg1 - 31.525f; // RAW -> dBm
+    // y = 2.948x - 9020.5
     float mW1 = 2.948f * (float)avg1 - 9020.5f; // RAW -> mW
-    // mW1 = random(0, 9999);
     tft.drawRightString(String(mW1, 0), 320 - 10, yLine3, 7);
   }
   else
