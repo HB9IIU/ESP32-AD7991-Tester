@@ -114,7 +114,7 @@ void loop()
       ++n1;
     }
   }
-  //n0 = 1;
+  // n0 = 1;
   if (n0 > 0)
   {
     uint16_t avg0 = (uint16_t)(sum0 / n0);
@@ -135,16 +135,14 @@ void loop()
     tft.setTextColor(TFT_BLACK, TFT_BLACK);
     tft.drawRightString(String(8888), leftMargin - 60, yLine3, 7);
     tft.setTextColor(TFT_YELLOW, TFT_BLACK);
-    float dBm0 = 0.0275f * (float)avg0 - 28.114f; // RAW -> dBm
-    float mW0 = powf(10.0f, dBm0 / 10.0f);        // dBm -> mW
-    //mW0 = random(0, 9999);                     // mW0 = random(0, 9999);
+    float mW0 = 2.813f * (float)avg0 - 4310.4f; // RAW -> mW
     tft.drawRightString(String(mW0, 0), leftMargin - 60, yLine3, 7);
   }
   else
   {
     Serial.print("CH0: n/a   ");
   }
-  //n1 = 1;
+  // n1 = 1;
   if (n1 > 0)
   {
     uint16_t avg1 = (uint16_t)(sum1 / n1);
@@ -165,9 +163,10 @@ void loop()
     tft.setTextColor(TFT_BLACK, TFT_BLACK);
     tft.drawRightString(String(8888), 320 - 10, yLine3, 7);
     tft.setTextColor(TFT_YELLOW, TFT_BLACK);
-    float dBm0 = 0.0256f * (float)avg1 - 31.525f; // RAW -> dBm
-    float mW1 = powf(10.0f, dBm0 / 10.0f);        // dBm -> mW
-   // mW1 = random(0, 9999);
+    // float dBm0 = 0.0256f * (float)avg1 - 31.525f; // RAW -> dBm
+    float mW1 = 2.5899f * (float)avg1 - 4597.1f; // RAW -> mW
+
+    // mW1 = random(0, 9999);
     tft.drawRightString(String(mW1, 0), 320 - 10, yLine3, 7);
   }
   else
