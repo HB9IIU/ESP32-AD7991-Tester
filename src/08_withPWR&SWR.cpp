@@ -135,7 +135,7 @@ void loop()
     tft.setTextColor(TFT_BLACK, TFT_BLACK);
     tft.drawRightString(String(-8888), leftMargin - 60, yLine3, 7);
     tft.setTextColor(TFT_YELLOW, TFT_BLACK);
-    float mW0 = 2.813f * (float)avg0 - 4310.4f; // RAW -> mW
+    float mW0 = 1.84f * (float)avg0 - 5634.6f; // RAW -> mW
      tft.setTextColor(TFT_BLACK, TFT_BLACK);
     mW0=0;
     tft.drawRightString(String(mW0, 0), leftMargin - 60, yLine3, 7);
